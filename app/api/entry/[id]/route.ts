@@ -10,9 +10,17 @@ const updateEntrySchema = z.object({
   price: z.number().nonnegative()
 });
 
-export async function PUT(req: NextRequest, context: any) {
-  const params = await context.params;
-  const id = Number(params.id);
+function getIdFromRequest(req: NextRequest): number | null {
+  const url = new URL(req.url);
+  const segments = url.pathname.split("/");
+  const idStr = segments[segments.length - 1];
+  const idNum = Number(idStr);
+  if (!idNum || Number.isNaN(idNum)) return null;
+  return idNum;
+}
+
+export async function PUT(req: NextRequest) {
+  const id = getIdFromRequest(req);
   if (!id || Number.isNaN(id)) {
     return NextResponse.json({ error: "Invalid entry id" }, { status: 400 });
   }
@@ -78,12 +86,8 @@ export async function PUT(req: NextRequest, context: any) {
   }
 }
 
-export async function DELETE(
-  _req: NextRequest,
-      context: any
-) {
-  const params = await context.params;
-  const id = Number(params.id);
+export async function DELETE(req: NextRequest) {
+  const id = getIdFromRequest(req);
   if (!id || Number.isNaN(id)) {
     return NextResponse.json({ error: "Invalid entry id" }, { status: 400 });
   }
