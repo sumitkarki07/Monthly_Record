@@ -10,10 +10,8 @@ const updateEntrySchema = z.object({
   price: z.number().nonnegative()
 });
 
-export async function PUT(
-  req: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function PUT(req: NextRequest, context: any) {
+  const params = await context.params;
   const id = Number(params.id);
   if (!id || Number.isNaN(id)) {
     return NextResponse.json({ error: "Invalid entry id" }, { status: 400 });
@@ -82,8 +80,9 @@ export async function PUT(
 
 export async function DELETE(
   _req: NextRequest,
-  { params }: { params: { id: string } }
+      context: any
 ) {
+  const params = await context.params;
   const id = Number(params.id);
   if (!id || Number.isNaN(id)) {
     return NextResponse.json({ error: "Invalid entry id" }, { status: 400 });
