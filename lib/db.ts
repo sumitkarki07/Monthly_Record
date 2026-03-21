@@ -23,8 +23,11 @@ if (process.env.NODE_ENV !== "production") {
   global.__dbPool = pool;
 }
 
-export async function query<T = any>(text: string, params?: any[]): Promise<{ rows: T[] }> {
-  const result = await pool.query<T>(text, params);
+export async function query(
+  text: string,
+  params?: any[]
+): Promise<{ rows: any[] }> {
+  const result = await pool.query(text, params);
   return { rows: result.rows };
 }
 

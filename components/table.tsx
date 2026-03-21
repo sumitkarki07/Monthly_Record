@@ -3,7 +3,7 @@ type EntryRow = {
   resident_name: string;
   date: string;
   price: number;
-  resident_id?: number;
+  resident_id: number;
 };
 
 type Totals = {

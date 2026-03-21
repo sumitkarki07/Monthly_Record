@@ -8,11 +8,7 @@ const createSchema = z.object({
 });
 
 export async function GET() {
-  const { rows } = await query<{
-    id: number;
-    month: number;
-    year: number;
-  }>(
+  const { rows } = await query(
     `SELECT id, month, year
      FROM registers
      ORDER BY year DESC, month DESC`
@@ -26,11 +22,7 @@ export async function POST(req: NextRequest) {
     const json = await req.json();
     const parsed = createSchema.parse(json);
 
-    const { rows } = await query<{
-      id: number;
-      month: number;
-      year: number;
-    }>(
+    const { rows } = await query(
       `INSERT INTO registers (month, year)
        VALUES ($1, $2)
        RETURNING id, month, year`,
@@ -57,4 +49,3 @@ export async function POST(req: NextRequest) {
     );
   }
 }
-

@@ -31,7 +31,7 @@ export async function PUT(req: NextRequest) {
 
     const name = parsed.resident_name.trim();
 
-    const existing = await query<{ id: number }>(
+    const existing = await query(
       `SELECT id FROM residents WHERE name = $1 LIMIT 1`,
       [name]
     );
@@ -39,23 +39,16 @@ export async function PUT(req: NextRequest) {
     let residentId: number;
 
     if (existing.rows.length > 0) {
-      residentId = existing.rows[0].id;
+      residentId = (existing.rows[0] as { id: number }).id;
     } else {
-      const inserted = await query<{ id: number }>(
+      const inserted = await query(
         `INSERT INTO residents (name) VALUES ($1) RETURNING id`,
         [name]
       );
-      residentId = inserted.rows[0].id;
+      residentId = (inserted.rows[0] as { id: number }).id;
     }
 
-    const { rows } = await query<{
-      id: number;
-      register_id: number;
-      resident_id: number;
-      resident_name: string;
-      date: string;
-      price: number;
-    }>(
+    const { rows } = await query(
       `UPDATE entries
        SET resident_id = $1,
            date = $2,
@@ -92,7 +85,7 @@ export async function DELETE(req: NextRequest) {
     return NextResponse.json({ error: "Invalid entry id" }, { status: 400 });
   }
 
-  const { rows } = await query<{ id: number }>(
+  const { rows } = await query(
     `DELETE FROM entries WHERE id = $1 RETURNING id`,
     [id]
   );

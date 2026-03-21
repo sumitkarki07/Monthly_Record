@@ -27,19 +27,19 @@ export async function POST(req: NextRequest) {
     if (!residentId && parsed.resident_name) {
       const name = parsed.resident_name.trim();
 
-      const existing = await query<{ id: number }>(
+      const existing = await query(
         `SELECT id FROM residents WHERE name = $1 LIMIT 1`,
         [name]
       );
 
       if (existing.rows.length > 0) {
-        residentId = existing.rows[0].id;
+        residentId = (existing.rows[0] as { id: number }).id;
       } else {
-        const inserted = await query<{ id: number }>(
+        const inserted = await query(
           `INSERT INTO residents (name) VALUES ($1) RETURNING id`,
           [name]
         );
-        residentId = inserted.rows[0].id;
+        residentId = (inserted.rows[0] as { id: number }).id;
       }
     }
 
@@ -50,14 +50,7 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const { rows } = await query<{
-      id: number;
-      register_id: number;
-      resident_id: number;
-      resident_name: string;
-      date: string;
-      price: number;
-    }>(
+    const { rows } = await query(
       `INSERT INTO entries (register_id, resident_id, date, price)
        VALUES ($1, $2, $3, $4)
        RETURNING id,
@@ -83,4 +76,3 @@ export async function POST(req: NextRequest) {
     );
   }
 }
-
