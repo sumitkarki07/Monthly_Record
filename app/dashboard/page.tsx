@@ -3,6 +3,8 @@
 import { FormEvent, useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import LangToggle, { useLang } from "../../components/langToggle";
+import { t, Lang } from "../../lib/translations";
 
 const AUTH_KEY = "monthly-record-auth";
 
@@ -12,16 +14,20 @@ type Register = {
   year: number;
 };
 
-function formatMonthYear(month: number, year: number) {
+function formatMonthYear(month: number, year: number, lang: Lang) {
+  const locale = lang === "nl" ? "nl-NL" : "en-US";
   const date = new Date(year, month - 1, 1);
-  return date.toLocaleDateString("en-US", {
-    month: "long",
-    year: "numeric"
-  });
+  return date.toLocaleDateString(locale, { month: "long", year: "numeric" });
+}
+
+function monthName(month: number, lang: Lang) {
+  const locale = lang === "nl" ? "nl-NL" : "en-US";
+  return new Date(2000, month - 1, 1).toLocaleDateString(locale, { month: "long" });
 }
 
 export default function DashboardPage() {
   const router = useRouter();
+  const [lang, setLang] = useLang();
   const [registers, setRegisters] = useState<Register[]>([]);
   const [loading, setLoading] = useState(true);
   const [creating, setCreating] = useState(false);
@@ -40,9 +46,7 @@ export default function DashboardPage() {
     const load = async () => {
       try {
         const res = await fetch("/api/register");
-        if (!res.ok) {
-          throw new Error("Failed to load registers");
-        }
+        if (!res.ok) throw new Error("Failed to load registers");
         const data = await res.json();
         setRegisters(data.registers ?? []);
       } catch (e: any) {
@@ -81,13 +85,29 @@ export default function DashboardPage() {
     }
   };
 
+  const handleLogout = () => {
+    if (typeof window !== "undefined") {
+      window.localStorage.removeItem(AUTH_KEY);
+    }
+    router.replace("/");
+  };
+
   return (
     <div className="min-h-screen flex items-start justify-center bg-slate-100 py-10">
       <div className="w-full max-w-4xl bg-white shadow-lg rounded-lg p-8">
         <div className="flex items-center justify-between mb-6">
           <h1 className="text-2xl font-semibold text-slate-800">
-            Monthly Records
+            {t("dashboard", "title", lang)}
           </h1>
+          <div className="flex items-center gap-3">
+            <LangToggle lang={lang} onChange={setLang} />
+            <button
+              onClick={handleLogout}
+              className="text-xs text-slate-500 hover:text-slate-700 font-medium"
+            >
+              Logout
+            </button>
+          </div>
         </div>
 
         <form
@@ -96,7 +116,7 @@ export default function DashboardPage() {
         >
           <div>
             <label className="block text-sm font-medium text-slate-700 mb-1">
-              Month
+              {t("dashboard", "month", lang)}
             </label>
             <select
               className="w-full border border-slate-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-pink-500"
@@ -105,14 +125,14 @@ export default function DashboardPage() {
             >
               {Array.from({ length: 12 }).map((_, idx) => (
                 <option key={idx + 1} value={idx + 1}>
-                  {formatMonthYear(idx + 1, 2000).split(" ")[0]}
+                  {monthName(idx + 1, lang)}
                 </option>
               ))}
             </select>
           </div>
           <div>
             <label className="block text-sm font-medium text-slate-700 mb-1">
-              Year
+              {t("dashboard", "year", lang)}
             </label>
             <input
               type="number"
@@ -133,7 +153,7 @@ export default function DashboardPage() {
                   : "bg-pink-600 hover:bg-pink-700"
               }`}
             >
-              {creating ? "Saving..." : "+ Create New Month"}
+              {creating ? t("dashboard", "saving", lang) : t("dashboard", "createBtn", lang)}
             </button>
           </div>
         </form>
@@ -145,10 +165,10 @@ export default function DashboardPage() {
         )}
 
         {loading ? (
-          <p className="text-slate-600">Loading registers...</p>
+          <p className="text-slate-600">{t("dashboard", "loading", lang)}</p>
         ) : registers.length === 0 ? (
           <p className="text-slate-600">
-            No monthly records yet. Create one above to get started.
+            {t("dashboard", "noRecords", lang)}
           </p>
         ) : (
           <ul className="divide-y divide-slate-200">
@@ -156,14 +176,14 @@ export default function DashboardPage() {
               <li key={reg.id} className="py-3 flex items-center justify-between">
                 <div>
                   <p className="font-medium text-slate-800">
-                    {formatMonthYear(reg.month, reg.year)}
+                    {formatMonthYear(reg.month, reg.year, lang)}
                   </p>
                 </div>
                 <Link
                   href={`/register/${reg.id}`}
                   className="text-primary hover:text-primary-light text-sm font-medium"
                 >
-                  View Register
+                  {t("dashboard", "viewRegister", lang)}
                 </Link>
               </li>
             ))}
@@ -173,4 +193,3 @@ export default function DashboardPage() {
     </div>
   );
 }
-

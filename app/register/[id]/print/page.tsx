@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { useParams } from "next/navigation";
+import { getSavedLang, Lang } from "../../../../lib/translations";
 
 type Entry = {
   id: number;
@@ -24,6 +25,11 @@ export default function RegisterPrintPage() {
   const [register, setRegister] = useState<RegisterInfo | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [lang, setLang] = useState<Lang>("nl");
+
+  useEffect(() => {
+    setLang(getSavedLang());
+  }, []);
 
   useEffect(() => {
     if (!registerId || Number.isNaN(registerId)) return;
@@ -31,9 +37,7 @@ export default function RegisterPrintPage() {
     const load = async () => {
       try {
         const res = await fetch(`/api/register/${registerId}`);
-        if (!res.ok) {
-          throw new Error("Failed to load register entries");
-        }
+        if (!res.ok) throw new Error("Failed to load register entries");
         const data = await res.json();
         setRegister(data.register);
         setEntries(data.entries ?? []);
@@ -64,11 +68,30 @@ export default function RegisterPrintPage() {
       minimumFractionDigits: 2
     }).format(value);
 
-  const formatDate = (iso: string) =>
-    new Date(iso).toLocaleDateString("en-GB", {
+  const formatDate = (iso: string) => {
+    const locale = lang === "nl" ? "nl-NL" : "en-GB";
+    return new Date(iso).toLocaleDateString(locale, {
       day: "numeric",
       month: "short"
     });
+  };
+
+  const monthLabel = (month: number) => {
+    const locale = lang === "nl" ? "nl-NL" : "en-US";
+    return new Date(2000, month - 1, 1).toLocaleDateString(locale, { month: "long" });
+  };
+
+  const labels = {
+    bewoner: lang === "nl" ? "BEWONER" : "RESIDENT",
+    datum: lang === "nl" ? "Datum" : "Date",
+    prijs: lang === "nl" ? "Prijs" : "Price",
+    periode: lang === "nl" ? "Periode" : "Period",
+    factuur: lang === "nl" ? "factuur nr 1" : "invoice nr 1",
+    noEntries: lang === "nl" ? "Nog geen items." : "No entries.",
+    totaal: lang === "nl" ? "Totaal" : "Total",
+    eindtotaal: lang === "nl" ? "Eindtotaal" : "Final Total",
+    loading: lang === "nl" ? "Overzicht laden..." : "Loading register..."
+  };
 
   return (
     <div className="min-h-screen bg-white text-slate-900 p-8 print:p-4">
@@ -95,19 +118,13 @@ export default function RegisterPrintPage() {
 
           <div className="flex justify-between text-xs">
             <div className="space-y-0.5">
-              <p>Periode</p>
-              <p>factuur nr 1</p>
+              <p>{labels.periode}</p>
+              <p>{labels.factuur}</p>
             </div>
             <div className="text-right">
               {register && (
                 <>
-                  <p>
-                    {new Date(
-                      register.year,
-                      register.month - 1,
-                      1
-                    ).toLocaleDateString("en-US", { month: "long" })}
-                  </p>
+                  <p>{monthLabel(register.month)}</p>
                   <p>{register.year}</p>
                 </>
               )}
@@ -122,20 +139,20 @@ export default function RegisterPrintPage() {
         )}
 
         {loading ? (
-          <p className="text-slate-700 text-sm">Loading register...</p>
+          <p className="text-slate-700 text-sm">{labels.loading}</p>
         ) : (
           <>
             <table className="w-full border border-slate-300 text-xs mb-4">
               <thead className="bg-blue-600 text-white">
                 <tr>
                   <th className="px-3 py-1 text-left border-b border-blue-800">
-                    BEWONER
+                    {labels.bewoner}
                   </th>
                   <th className="px-3 py-1 text-center border-b border-blue-800 w-32">
-                    Datum
+                    {labels.datum}
                   </th>
                   <th className="px-3 py-1 text-right border-b border-blue-800 w-24">
-                    Prijs
+                    {labels.prijs}
                   </th>
                 </tr>
               </thead>
@@ -146,7 +163,7 @@ export default function RegisterPrintPage() {
                       colSpan={3}
                       className="px-3 py-2 text-center text-slate-500"
                     >
-                      No entries.
+                      {labels.noEntries}
                     </td>
                   </tr>
                 ) : (
@@ -169,7 +186,7 @@ export default function RegisterPrintPage() {
 
             <div className="mt-4 flex flex-col items-end text-xs space-y-1">
               <div className="flex gap-6">
-                <span className="font-medium">Totaal:</span>
+                <span className="font-medium">{labels.totaal}:</span>
                 <span className="font-semibold">
                   {formatCurrency(totals.total)}
                 </span>
@@ -181,7 +198,7 @@ export default function RegisterPrintPage() {
                 </span>
               </div>
               <div className="flex gap-6">
-                <span className="font-medium">Eindtotaal:</span>
+                <span className="font-medium">{labels.eindtotaal}:</span>
                 <span className="font-semibold">
                   {formatCurrency(totals.finalTotal)}
                 </span>
@@ -193,4 +210,3 @@ export default function RegisterPrintPage() {
     </div>
   );
 }
-

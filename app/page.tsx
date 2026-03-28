@@ -2,6 +2,8 @@
 
 import { FormEvent, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import LangToggle, { useLang } from "../components/langToggle";
+import { t } from "../lib/translations";
 
 const USERNAME = process.env.NEXT_PUBLIC_ADMIN_USERNAME ?? "admin";
 const PASSWORD = process.env.NEXT_PUBLIC_ADMIN_PASSWORD ?? "admin123";
@@ -9,6 +11,7 @@ const AUTH_KEY = "monthly-record-auth";
 
 export default function LoginPage() {
   const router = useRouter();
+  const [lang, setLang] = useLang();
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -30,20 +33,23 @@ export default function LoginPage() {
       }
       router.push("/dashboard");
     } else {
-      setError("Invalid credentials. Please try again.");
+      setError(t("login", "invalidCreds", lang));
     }
   };
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-slate-100">
       <div className="w-full max-w-md bg-white shadow-lg rounded-lg p-8">
-        <h1 className="text-2xl font-semibold text-center text-slate-800 mb-6">
-          Monthly Billing Record System
-        </h1>
+        <div className="flex items-center justify-between mb-6">
+          <h1 className="text-2xl font-semibold text-slate-800">
+            {t("login", "title", lang)}
+          </h1>
+          <LangToggle lang={lang} onChange={setLang} />
+        </div>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
             <label className="block text-sm font-medium text-slate-700 mb-1">
-              Username
+              {t("login", "username", lang)}
             </label>
             <input
               type="text"
@@ -54,7 +60,7 @@ export default function LoginPage() {
           </div>
           <div>
             <label className="block text-sm font-medium text-slate-700 mb-1">
-              Password
+              {t("login", "password", lang)}
             </label>
             <input
               type="password"
@@ -72,11 +78,10 @@ export default function LoginPage() {
             type="submit"
             className="w-full bg-pink-600 text-white font-medium py-2 rounded-md hover:bg-pink-700 transition-colors"
           >
-            Login
+            {t("login", "loginBtn", lang)}
           </button>
         </form>
       </div>
     </div>
   );
 }
-

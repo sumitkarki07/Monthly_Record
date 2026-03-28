@@ -1,3 +1,5 @@
+import { Lang, t } from "../lib/translations";
+
 type EntryRow = {
   id: number;
   resident_name: string;
@@ -16,12 +18,14 @@ export default function EntryTable({
   entries,
   totals,
   onDelete,
-  onEdit
+  onEdit,
+  lang = "nl"
 }: {
   entries: EntryRow[];
   totals: Totals;
   onDelete?: (id: number) => void;
   onEdit?: (entry: EntryRow) => void;
+  lang?: Lang;
 }) {
   const formatCurrency = (value: number) =>
     new Intl.NumberFormat("de-DE", {
@@ -30,11 +34,13 @@ export default function EntryTable({
       minimumFractionDigits: 2
     }).format(value);
 
-  const formatDate = (iso: string) =>
-    new Date(iso).toLocaleDateString("en-GB", {
+  const formatDate = (iso: string) => {
+    const locale = lang === "nl" ? "nl-NL" : "en-GB";
+    return new Date(iso).toLocaleDateString(locale, {
       day: "numeric",
       month: "short"
     });
+  };
 
   return (
     <div className="overflow-x-auto">
@@ -42,17 +48,17 @@ export default function EntryTable({
         <thead className="bg-primary text-white">
           <tr>
             <th className="px-4 py-2 text-left font-semibold border-b border-primary-dark">
-              Resident Name
+              {t("table", "residentName", lang)}
             </th>
             <th className="px-4 py-2 text-center font-semibold border-b border-primary-dark">
-              Date
+              {t("table", "date", lang)}
             </th>
             <th className="px-4 py-2 text-right font-semibold border-b border-primary-dark">
-              Price
+              {t("table", "price", lang)}
             </th>
             {(onDelete || onEdit) && (
               <th className="px-4 py-2 text-center font-semibold border-b border-primary-dark">
-                Actions
+                {t("table", "actions", lang)}
               </th>
             )}
           </tr>
@@ -64,7 +70,7 @@ export default function EntryTable({
                 colSpan={onDelete || onEdit ? 4 : 3}
                 className="px-4 py-4 text-center text-slate-500"
               >
-                No entries yet.
+                {t("table", "noEntries", lang)}
               </td>
             </tr>
           ) : (
@@ -91,7 +97,7 @@ export default function EntryTable({
                           onClick={() => onEdit(entry)}
                           className="text-xs text-primary hover:text-primary-light font-medium"
                         >
-                          Edit
+                          {t("table", "edit", lang)}
                         </button>
                       )}
                       {onDelete && (
@@ -100,7 +106,7 @@ export default function EntryTable({
                           onClick={() => onDelete(entry.id)}
                           className="text-xs text-red-600 hover:text-red-700 font-medium"
                         >
-                          Delete
+                          {t("table", "delete", lang)}
                         </button>
                       )}
                     </div>
@@ -114,15 +120,15 @@ export default function EntryTable({
 
       <div className="mt-4 flex flex-col items-end space-y-1 text-sm">
         <div className="flex justify-between gap-8">
-          <span className="font-medium text-slate-700">Total:</span>
+          <span className="font-medium text-slate-700">{t("table", "total", lang)}:</span>
           <span className="font-semibold">{formatCurrency(totals.total)}</span>
         </div>
         <div className="flex justify-between gap-8">
-          <span className="font-medium text-slate-700">15%:</span>
+          <span className="font-medium text-slate-700">{t("table", "fifteen", lang)}:</span>
           <span className="font-semibold">{formatCurrency(totals.fifteen)}</span>
         </div>
         <div className="flex justify-between gap-8">
-          <span className="font-medium text-slate-700">Final Total:</span>
+          <span className="font-medium text-slate-700">{t("table", "finalTotal", lang)}:</span>
           <span className="font-semibold">
             {formatCurrency(totals.finalTotal)}
           </span>
@@ -131,4 +137,3 @@ export default function EntryTable({
     </div>
   );
 }
-
