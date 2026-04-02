@@ -5,7 +5,7 @@ import { useParams, useRouter } from "next/navigation";
 import EntryTable from "../../../components/table";
 import EntryForm from "../../../components/entryForm";
 import LangToggle, { useLang } from "../../../components/langToggle";
-import { t, Lang } from "../../../lib/translations";
+import { t, Lang, invoiceNumber } from "../../../lib/translations";
 
 const AUTH_KEY = "monthly-record-auth";
 
@@ -221,7 +221,7 @@ export default function RegisterPage() {
           <div className="flex items-center justify-between mt-4">
             <div className="text-xs text-slate-700 space-y-0.5">
               <p>{t("register", "periode", lang)}</p>
-              <p>{t("register", "factuur", lang)}</p>
+              <p>{t("register", "factuurLabel", lang)} {register ? invoiceNumber(register.year, register.month) : ""}</p>
             </div>
             <div className="text-xs text-slate-700 text-right">
               {register && (

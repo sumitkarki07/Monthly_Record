@@ -23,7 +23,7 @@ const translations = {
     backToDashboard: { en: "Back to Dashboard", nl: "Terug naar Dashboard" },
     previewPrint: { en: "Preview / Print & Download", nl: "Voorbeeld / Afdrukken & Downloaden" },
     periode: { en: "Period", nl: "Periode" },
-    factuur: { en: "invoice nr 1", nl: "factuur nr 1" },
+    factuurLabel: { en: "invoice nr", nl: "factuur nr" },
     loading: { en: "Loading register...", nl: "Overzicht laden..." },
     editEntry: { en: "Edit Entry", nl: "Item Bewerken" },
     addEntry: { en: "Add Entry", nl: "Item Toevoegen" },
@@ -71,4 +71,8 @@ export function saveLang(lang: Lang) {
   if (typeof window !== "undefined") {
     window.localStorage.setItem(LANG_KEY, lang);
   }
+}
+
+export function invoiceNumber(year: number, month: number): string {
+  return `${year}-${month}`;
 }

@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { useParams } from "next/navigation";
-import { getSavedLang, Lang } from "../../../../lib/translations";
+import { getSavedLang, Lang, invoiceNumber } from "../../../../lib/translations";
 
 type Entry = {
   id: number;
@@ -86,7 +86,7 @@ export default function RegisterPrintPage() {
     datum: lang === "nl" ? "Datum" : "Date",
     prijs: lang === "nl" ? "Prijs" : "Price",
     periode: lang === "nl" ? "Periode" : "Period",
-    factuur: lang === "nl" ? "factuur nr 1" : "invoice nr 1",
+    factuurLabel: lang === "nl" ? "factuur nr" : "invoice nr",
     noEntries: lang === "nl" ? "Nog geen items." : "No entries.",
     totaal: lang === "nl" ? "Totaal" : "Total",
     eindtotaal: lang === "nl" ? "Eindtotaal" : "Final Total",
@@ -119,7 +119,7 @@ export default function RegisterPrintPage() {
           <div className="flex justify-between text-xs">
             <div className="space-y-0.5">
               <p>{labels.periode}</p>
-              <p>{labels.factuur}</p>
+              <p>{labels.factuurLabel} {register ? invoiceNumber(register.year, register.month) : ""}</p>
             </div>
             <div className="text-right">
               {register && (
